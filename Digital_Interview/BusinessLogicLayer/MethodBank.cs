@@ -68,7 +68,6 @@ namespace BusinessLogicLayer
             DigitalInterviewDbContext context = new DigitalInterviewDbContext();
             return context.subcriptions.ToList();
         }
-
         public void RegisterUser(User user)
         {
             using (Context dbContext = new Context())
@@ -96,7 +95,6 @@ namespace BusinessLogicLayer
             }
             return null;
         }
-
         public int GetNumberOfSubcriptions()
         {
             using (Context context = new Context())
@@ -125,7 +123,6 @@ namespace BusinessLogicLayer
                 return context.couchers.Count();
             }
         }
-
         public int GetSubscriptionUsers(int subscriptionId)
         {
             using (Context context = new Context())
@@ -152,7 +149,6 @@ namespace BusinessLogicLayer
             }
             return 0;
         }
-
         public bool AddUserToSubcription(int userId, int subcriptionId)
         {
             Context context = new Context();
@@ -174,7 +170,6 @@ namespace BusinessLogicLayer
             }
             return false;
         } 
-
         public Dashboard GetDashboard(int userId)
         {
             Context context = new Context();
@@ -187,6 +182,80 @@ namespace BusinessLogicLayer
             dash.FirstName = context.users.Where(x => x.ID == userId).FirstOrDefault().FirstName;
             dash.LastName = context.users.Where(x => x.ID == userId).FirstOrDefault().LastName;
             return dash;
+        }
+
+        public bool UserResource(int UserId,int SubcriptionId,int ResourceId)
+        {
+            using (Context context = new Context())
+            {
+                bool hasValidVoucher;
+                try
+                {
+                    var userVoucher = context.couchers.Where(x => x.user.ID == UserId && x.Used == false && x.ExpiryDate >= DateTime.Now);
+                    var firstOrDefault = userVoucher.FirstOrDefault();
+                    if (firstOrDefault != null) firstOrDefault.Used = true;
+                    return true;
+                }
+                catch
+                {
+                    hasValidVoucher = false;
+                }
+
+                if (!hasValidVoucher)
+                {
+                    try
+                    {
+                        var dailyLimit = context.userSubcriptions.Single(x => x.SubcriptionID.ID == SubcriptionId && x.UserID.ID == UserId).DailyLimit;
+                        var userCredit = context.credit.Where(x => x.user.ID == UserId && x.Date == DateTime.Now.Date).Sum(x => x.CreditUsed);
+                        var resourceFee = context.resource.Single(x => x.ID == ResourceId).ActivationFee;
+
+                        if (userCredit <= dailyLimit)
+                        {
+                            DataBank db = new DataBank();
+                            db.AddCredit(UserId, resourceFee);
+                            return true;
+                        }
+                        return false;
+                    }
+                    catch
+                    {
+                        return false;
+                    }
+                }
+            }
+            return false;
+        }
+
+        public int GetUserUsageBalance(int subcriptionId, int UserId)
+        {
+            using (Context context = new Context())
+            {
+                int todaysBalance = 0;
+                bool flag = false;
+                    var dailyLimit = context.userSubcriptions.FirstOrDefault(u => u.UserID.ID == UserId).DailyLimit;
+
+                    try
+                    {
+                        todaysBalance = context.credit.Where(x => x.Date == DateTime.Now.Date && x.user.ID == UserId).Sum(x => x.CreditUsed);
+                        todaysBalance = dailyLimit - todaysBalance;
+                        flag = true;
+                    }
+                    catch
+                    {                        
+                    }
+
+                    if (!flag)
+                    {
+                        try
+                        {
+                            todaysBalance = context.userSubcriptions.FirstOrDefault(u => u.UserID.ID == UserId).DailyLimit;
+                        }
+                        catch
+                        {
+                        } 
+                    }
+                return todaysBalance;
+            }
         }
     }
 

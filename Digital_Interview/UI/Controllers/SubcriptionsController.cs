@@ -12,16 +12,13 @@ using DataModelCommon;
 namespace UI.Controllers
 {
     public class SubcriptionsController : Controller
-    {
-        private Context db = new Context();
-
-        // GET: Subcriptions
+    {        
         public ActionResult Index()
         {
             if (Session["UserID"] != null)
             {
                 MethodBank mb = new MethodBank();
-                return View(db.subcriptions.ToList());
+                return View(mb.GetSubcriptions());
             }
             return RedirectToAction("Login","Home", new { area = ""});
         }
@@ -59,8 +56,8 @@ namespace UI.Controllers
         {
             if (ModelState.IsValid)
             {
-                db.subcriptions.Add(subcription);
-                db.SaveChanges();
+                DataBank db = new DataBank();
+                db.CreateSubscription(subcription);
                 return RedirectToAction("Index");
             }
 
@@ -73,7 +70,8 @@ namespace UI.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Subcription subcription = db.subcriptions.Find(id);
+            DataBank db = new DataBank();
+            Subcription subcription = db.GetSubcription(id);
             if (subcription == null)
             {
                 return HttpNotFound();
@@ -87,28 +85,21 @@ namespace UI.Controllers
         {
             if (ModelState.IsValid)
             {
-                db.Entry(subcription).State = EntityState.Modified;
-                db.SaveChanges();
+                DataBank db = new DataBank();
+                db.EditSubcription(subcription);
                 return RedirectToAction("Index");
             }
             return View(subcription);
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
-        }
         public ActionResult EditCreditPool(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Subcription subcription = db.subcriptions.Find(id);
+            DataBank db = new DataBank();
+            Subcription subcription = db.GetSubcription(id);
             if (subcription == null)
             {
                 return HttpNotFound();
@@ -121,8 +112,8 @@ namespace UI.Controllers
         {
             if (ModelState.IsValid)
             {
-                db.Entry(subcription).State = EntityState.Modified;
-                db.SaveChanges();
+                DataBank db = new DataBank();
+                db.EditSubcription(subcription);
                 return RedirectToAction("Index");
             }
             return View(subcription);

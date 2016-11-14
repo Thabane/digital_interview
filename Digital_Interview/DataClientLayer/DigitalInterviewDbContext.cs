@@ -28,7 +28,6 @@ namespace DataClientLayer
         public DbSet<UserSubcription> userSubcriptions { get; set; }
         public DbSet<Credit> credit { get; set; }
         public DbSet<Voucher> couchers { get; set; }
-        public DbSet<ResourceAction> resourceAction { get; set; }
         public DbSet<Resource> resource { get; set; }
         public DbSet<ToDoList> toDoList { get; set; }
 

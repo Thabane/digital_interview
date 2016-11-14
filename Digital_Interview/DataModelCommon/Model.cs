@@ -72,9 +72,6 @@ namespace DataModelCommon
 
         [Required]
         public Subcription subcription { get; set; }
-
-        [Required]
-        public ResourceAction action { get; set; }
     }
 
     public class Voucher
@@ -87,33 +84,13 @@ namespace DataModelCommon
 
         public DateTime ExpiryDate { get; set; }
 
-        public int Used { get; set; }
+        public bool Used { get; set; }
 
         [Required]
         public User user { get; set; }
 
         [Required]
         public Subcription subcription { get; set; }
-
-        public ResourceAction action { get; set; }
-    }
-
-    public class ResourceAction
-    {
-        [Key]
-        public int ID { get; set; }
-
-        public string Type { get; set; }
-
-        public Subcription subcription { get; set; }
-
-        public User user { get; set; }
-
-        [Required]
-        public int ChargedFee { get; set; }
-
-        [Required]
-        public DateTime Date { get; set; }
     }
 
     public class Resource

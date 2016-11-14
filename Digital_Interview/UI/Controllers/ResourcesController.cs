@@ -18,7 +18,8 @@ namespace UI.Controllers
         public ActionResult Index()
         {
             int subId = Convert.ToInt32(Session["SubscriptionID"]);
-            var dbResource = db.resource.Where(x => x.subcription.ID == subId);
+            DataBank db =  new DataBank();
+            var dbResource = db.GetResourceById(subId);
             List<ResourceModelView> rvm = new List<ResourceModelView>();
 
             foreach (var res in dbResource)
@@ -54,23 +55,23 @@ namespace UI.Controllers
         {
             if (ModelState.IsValid)
             {
-                var res  = db.subcriptions.Find(resource.subcriptionId);
-                var finalRes = new Resource() {ActivationFee =  resource.ActivationFee,Name = resource.Name,subcription = res};
-                db.resource.Add(finalRes);
-                db.SaveChanges();
+                DataBank db = new DataBank();
+                var res  = db.GetSubcription(resource.subcriptionId);
+                var finalRes = new Resource() {ActivationFee =  resource.ActivationFee,Name = resource.Name,subcription = res};                
+                db.CreateResource(finalRes);
                 return RedirectToAction("Index");
             }
             return View(resource);
         }
 
-        // GET: Resources/Edit/5
         public ActionResult Edit(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Resource resource = db.resource.Find(id);
+            DataBank db = new DataBank();
+            Resource resource = db.GetResource(id);
             if (resource == null)
             {
                 return HttpNotFound();
@@ -78,29 +79,17 @@ namespace UI.Controllers
             return View(resource);
         }
 
-        // POST: Resources/Edit/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include = "ID,Name,ActivationFee")] Resource resource)
         {
             if (ModelState.IsValid)
             {
-                db.Entry(resource).State = EntityState.Modified;
-                db.SaveChanges();
+                DataBank db = new DataBank();
+                db.EditResource(resource);
                 return RedirectToAction("Index");
             }
             return View(resource);
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
         }
 
         public ActionResult UseResource(int resID, int subcriptionID)
