@@ -13,9 +13,6 @@ namespace UI.Controllers
 {
     public class UsersController : Controller
     {
-        private Context db = new Context();
-
-        // GET: Users
         public ActionResult Index()
         {
             if (Session["UserID"] != null)
@@ -33,7 +30,8 @@ namespace UI.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            UserSubcription userSubcription = db.userSubcriptions.Find(id);
+            DataBank db = new DataBank();
+            UserSubcription userSubcription = db.GetUserSubcription(id);
             if (userSubcription == null)
             {
                 return HttpNotFound();
@@ -46,23 +44,14 @@ namespace UI.Controllers
         {
             if (ModelState.IsValid)
             {
-                db.Entry(userSubcription).State = EntityState.Modified;
-                db.SaveChanges();
+                DataBank db = new DataBank();
+                db.EditUserSubcription(userSubcription);
                 return RedirectToAction("Index");
             }
             return View(userSubcription);
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
-        }
-
-        public ActionResult AddVoucher(int userId,int subcriptionId)
+        public ActionResult AddVoucher(int userId, int subcriptionId)
         {
             Session["VoucherUserId"] = userId.ToString();
             Session["VoucherSubscriptionId"] = subcriptionId.ToString();
@@ -71,22 +60,15 @@ namespace UI.Controllers
         [HttpPost]
         public ActionResult AddVoucher([Bind(Include = "user,subcription,Used,ExpiryDate")] Voucher voucher)
         {
-            voucher.user = db.users.Find(Convert.ToInt32(Session["VoucherUserId"]));
-            voucher.subcription = db.subcriptions.Find(Convert.ToInt32(Session["VoucherSubscriptionId"]));
+            DataBank db = new DataBank();
+            voucher.user = db.GetUser(Convert.ToInt32(Session["VoucherUserId"]));
+            voucher.subcription = db.GetSubcription(Convert.ToInt32(Session["VoucherSubscriptionId"]));
             voucher.Date = DateTime.Now;
-
-            try
+            if (db.AddVoucher(voucher))
             {
-                db.couchers.Add(voucher);
-                db.SaveChanges();
                 return RedirectToAction("Index");
             }
-            catch
-            {
-                return View();
-            }
-
-            
+            return View();
         }
     }
 }

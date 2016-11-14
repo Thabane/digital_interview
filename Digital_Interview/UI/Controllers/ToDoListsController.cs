@@ -13,13 +13,12 @@ namespace UI.Controllers
 {
     public class ToDoListsController : Controller
     {
-        private Context db = new Context();
-
         public ActionResult Index()
         {
             Session["ResId"] = Request.QueryString["resId"];
             Session["SubcriptionId"] = Request.QueryString["subcriptionId"];
-            return View(db.toDoList.ToList().OrderBy(x => x.Prority));
+            DataBank db = new DataBank();
+            return View(db.GetToDoList());
         }
 
         public ActionResult Details(int? id)
@@ -28,12 +27,13 @@ namespace UI.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            ToDoList toDoList = db.toDoList.Find(id);
+            DataBank db = new DataBank();
+            ToDoList toDoList = db.GetToDolistItem(id);
             if (toDoList == null)
             {
                 return HttpNotFound();
             }
-            toDoList.Resource = db.resource.Find(Convert.ToInt32(Session["ResId"]));
+            toDoList.Resource = db.GetResource(Convert.ToInt32(Session["ResId"]));
             ToDoListViewModel viewModel = new ToDoListViewModel();
             viewModel.ID = toDoList.ID;
             viewModel.Title = toDoList.Title;
@@ -54,21 +54,17 @@ namespace UI.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "ID,Title,Content,Prority,Done,CreatedDate,DueDate")] ToDoList toDoList)
         {
+            DataBank db = new DataBank();
             toDoList.Done = false;
             toDoList.CreatedDate = DateTime.Now;
-            toDoList.Resource = db.resource.Find(Convert.ToInt32(Session["ResId"]));
-            toDoList.Resource.subcription = db.subcriptions.Find(Convert.ToInt32(Session["SubcriptionId"]));
-
-            try
+            toDoList.Resource = db.GetResource(Convert.ToInt32(Session["ResId"]));
+            toDoList.Resource.subcription = db.GetSubcription(Convert.ToInt32(Session["SubcriptionId"]));
+            if(db.CreateToDoListItem(toDoList))
             {
-                db.toDoList.Add(toDoList);
-                db.SaveChanges();
                 return RedirectToAction("Index");
             }
-            catch
-            {
-                return View(toDoList);
-            }
+            return View(toDoList);
+
         }
 
         public ActionResult Edit(int? id)
@@ -77,12 +73,13 @@ namespace UI.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            ToDoList toDoList = db.toDoList.Find(id);
+            DataBank db = new DataBank();
+            ToDoList toDoList = db.GetToDolistItem(id);
             if (toDoList == null)
             {
                 return HttpNotFound();
             }
-            toDoList.Resource = db.resource.Find(Convert.ToInt32(Session["ResId"]));
+            toDoList.Resource = db.GetResource(Convert.ToInt32(Session["ResId"]));
             ToDoListViewModel viewModel = new ToDoListViewModel();
             viewModel.ID = toDoList.ID;
             viewModel.Title = toDoList.Title;
@@ -99,7 +96,7 @@ namespace UI.Controllers
         public ActionResult Edit([Bind(Include = "ID,Title,Content,Prority,Done,CreatedDate,DueDate")] ToDoListViewModel toDoList)
         {
             ToDoList UpdatedToDo = new ToDoList();
-
+            DataBank db = new DataBank();
             UpdatedToDo.ID = toDoList.ID;
             UpdatedToDo.Title = toDoList.Title;
             UpdatedToDo.Content = toDoList.Content;
@@ -107,12 +104,11 @@ namespace UI.Controllers
             UpdatedToDo.Done = toDoList.Done;
             UpdatedToDo.DueDate = toDoList.DueDate;
             UpdatedToDo.Prority = toDoList.Prority;
-            UpdatedToDo.Resource = db.resource.Find(toDoList.Resource);
+            UpdatedToDo.Resource = db.GetResource(toDoList.Resource);
 
             if (ModelState.IsValid)
             {
-                db.Entry(UpdatedToDo).State = EntityState.Modified;
-                db.SaveChanges();
+                db.EditToDo(UpdatedToDo);
                 return RedirectToAction("Index");
             }
             return View(toDoList);
@@ -124,7 +120,8 @@ namespace UI.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            ToDoList toDoList = db.toDoList.Find(id);
+            DataBank db = new DataBank();
+            ToDoList toDoList = db.GetToDolistItem(id);
             if (toDoList == null)
             {
                 return HttpNotFound();
@@ -136,19 +133,10 @@ namespace UI.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            ToDoList toDoList = db.toDoList.Find(id);
-            db.toDoList.Remove(toDoList);
-            db.SaveChanges();
+            DataBank db = new DataBank();
+            ToDoList toDoList = db.GetToDolistItem(id);
+            db.RemoveToDo(toDoList);
             return RedirectToAction("Index");
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
         }
     }
 }
