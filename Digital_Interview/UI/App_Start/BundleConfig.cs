@@ -22,7 +22,10 @@ namespace UI
 
             bundles.Add(new StyleBundle("~/Content/css").Include(
                       "~/Content/bootstrap.css",
-                      "~/Content/site.css"));
+                      "~/Content/bootstrap-responsive.min.css",
+                      "~/Content/theme.css",
+                      "~/Content/Site.css"));
+
         }
     }
 }

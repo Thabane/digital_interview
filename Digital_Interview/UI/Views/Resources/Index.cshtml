@@ -1,0 +1,39 @@
+﻿@model IEnumerable<DataModelCommon.ResourceModelView>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Company Resources</h2>
+
+<p>
+    @Html.ActionLink("Create New Resource", "Create")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Name)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.ActivationFee)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.Name)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.ActivationFee)
+        </td>
+        <td>
+            @Html.ActionLink("Edit", "Edit", new { id=item.ID }) |
+            @Html.ActionLink("Use", "UseResource", new { resId = item.ID, subcriptionId = item.subcriptionId }) |
+        </td>
+    </tr>
+}
+
+</table>
