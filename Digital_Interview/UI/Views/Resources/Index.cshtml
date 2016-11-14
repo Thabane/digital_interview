@@ -1,0 +1,76 @@
+﻿@model IEnumerable<DataModelCommon.ResourceModelView>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Company Resources</h2>
+
+<p>
+    @Html.ActionLink("Create New Resource", "Create")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Name)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.ActivationFee)
+        </th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ActivationFee)
+            </td>
+            <td>
+                @Html.ActionLink("Edit", "Edit", new {id = item.ID}) |
+                <a class="btn-danger" data-toggle="modal" data-target=".bootstrapmodal" data-resid="@item.ID" data-subid="@item.subcriptionId">Use</a> |
+            </td>
+        </tr>
+    }
+
+</table>
+
+@*----Modal----*@
+
+
+    <div class="modal fade bootstrapmodal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <button data-dismiss="modal" class="close"><span>&times;</span></button>
+                <div class="modal-header">
+                    <div class="modal-title btn-danger">Warning</div>
+                </div>
+                <div class="modal-body">
+                    <p>
+                        Using Company Resources has Credit Pool which all users subcribed to a subcription may use.
+                    </p>
+                    <p>
+                        Your user account has a daily limit of __
+                    </p>
+                    <p>
+                        Do you wish to use your daily credit limit to access the company resources?
+                    </p>
+                    <br />
+                    <p>
+                        Click Yes to continue or close this window to cancel
+                    </p>
+
+                    <input type="text" id="resourceid" value="" />
+                    <input type="text" id="subscriptionid" value="" />
+
+                </div>
+                <div class="modal-footer">
+                    <Button class="btn alert-success" type="button" onclick="RedirectFunc()"> Yes</Button>
+                </div>
+            </div>
+        </div>
+    </div>

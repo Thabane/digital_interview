@@ -1,0 +1,46 @@
+﻿@using System.Web.Mvc.Html
+@using BusinessLogicLayer
+@using DataModelCommon
+@model DataModelCommon.UserSubcription
+
+@{
+    ViewBag.Title = "AddUserToSubscription";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Add User To Subscription</h2>
+
+@using (Html.BeginForm()) 
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(model => model.SubcriptionID.ID)
+
+    <div class="form-horizontal">
+        <h4>UserSubcription</h4>
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="form-group">
+            @Html.LabelFor(model => model.UserID, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-offset-2 col-md-10">
+                @{
+                    var user = new MethodBank().GetUsers().Select(u => new { FullName = string.Format("{0} {1}", u.FirstName, u.LastName), id = u.ID});
+                    @Html.DropDownListFor(model => model.UserID.ID, new SelectList(user, "id", "FullName"), "Select User")
+                }
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Add User" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>

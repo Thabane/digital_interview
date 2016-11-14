@@ -15,3 +15,18 @@ select,
 textarea {
     max-width: 280px;
 }
+
+.boxColour {
+    opacity: 0.1;
+    filter: alpha(opacity=50);
+    background-color:black
+}
+.btn-box:hover {
+    opacity: 0.5;
+    filter: alpha(opacity=100);
+    color: red;
+    background-color: lightblue;
+}
+.customNav {
+    background-color: lightblue;
+}

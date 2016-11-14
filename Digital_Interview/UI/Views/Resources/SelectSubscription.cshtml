@@ -1,0 +1,30 @@
+﻿@using BusinessLogicLayer
+@model DataModelCommon.Subcription
+@{
+    ViewBag.Title = "SelectSubscription";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Select Subscription</h2>
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    <div class="form-group">
+        @Html.Label("SubscriptionsLabel", htmlAttributes: new {@class = "control-label col-md-2"})
+        <div class="col-md-offset-2 col-md-10">
+            @{
+                var subs = new MethodBank().GetSubcriptions();
+                @Html.DropDownListFor(model => model.ID, new SelectList(subs, "ID", "Name"), "Select A Subsription")
+            }
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <input type="submit" value="View Resources" class="btn btn-default"/>
+        </div>
+    </div>
+}
+
+
+
