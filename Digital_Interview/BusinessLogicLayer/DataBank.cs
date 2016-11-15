@@ -52,7 +52,7 @@ namespace BusinessLogicLayer
             }
         }
 
-        public bool AddCredit(int UserId,int Fee)
+        public bool AddCredit(int UserId,int Fee, int subId)
         {
             using (Context context = new Context())
             {
@@ -62,6 +62,7 @@ namespace BusinessLogicLayer
                     credit.Date = DateTime.Now;
                     credit.CreditUsed = Fee;
                     credit.user = context.users.Find(UserId);
+                    credit.subcription = GetSubcription(subId);
                     context.credit.Add(credit);
                     context.SaveChanges();
                     return true;

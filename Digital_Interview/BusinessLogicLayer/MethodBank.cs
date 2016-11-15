@@ -184,7 +184,7 @@ namespace BusinessLogicLayer
             return dash;
         }
 
-        public bool UserResource(int UserId,int SubcriptionId,int ResourceId)
+        public bool UseResource(int UserId,int SubcriptionId,int ResourceId)
         {
             using (Context context = new Context())
             {
@@ -193,8 +193,13 @@ namespace BusinessLogicLayer
                 {
                     var userVoucher = context.couchers.Where(x => x.user.ID == UserId && x.Used == false && x.ExpiryDate >= DateTime.Now);
                     var firstOrDefault = userVoucher.FirstOrDefault();
-                    if (firstOrDefault != null) firstOrDefault.Used = true;
-                    return true;
+                    if (firstOrDefault != null)
+                    {
+                        MethodBank mb = new MethodBank();
+                        mb.MarkVoucherAsDone(firstOrDefault.ID);
+                        return true;
+                    }
+                    hasValidVoucher = false;
                 }
                 catch
                 {
@@ -205,14 +210,23 @@ namespace BusinessLogicLayer
                 {
                     try
                     {
-                        var dailyLimit = context.userSubcriptions.Single(x => x.SubcriptionID.ID == SubcriptionId && x.UserID.ID == UserId).DailyLimit;
-                        var userCredit = context.credit.Where(x => x.user.ID == UserId && x.Date == DateTime.Now.Date).Sum(x => x.CreditUsed);
+                        var dailyLimit = context.userSubcriptions.FirstOrDefault(x => x.SubcriptionID.ID == SubcriptionId && x.UserID.ID == UserId).DailyLimit;
+                        //var dailyLimit = context.userSubcriptions.FirstOrDefault(u => u.UserID.ID == UserId).DailyLimit;
+                        int userCredit;
+                        try
+                        {
+                            userCredit = context.credit.Where(x => x.user.ID == UserId && x.Date == DateTime.Now.Date).Sum(x => x.CreditUsed);
+                        }
+                        catch
+                        {
+                            userCredit = 0;
+                        }
                         var resourceFee = context.resource.Single(x => x.ID == ResourceId).ActivationFee;
 
                         if (userCredit <= dailyLimit)
                         {
                             DataBank db = new DataBank();
-                            db.AddCredit(UserId, resourceFee);
+                            db.AddCredit(UserId, resourceFee, SubcriptionId);
                             return true;
                         }
                         return false;
@@ -248,13 +262,23 @@ namespace BusinessLogicLayer
                     {
                         try
                         {
-                            todaysBalance = context.userSubcriptions.FirstOrDefault(u => u.UserID.ID == UserId).DailyLimit;
+                            todaysBalance = dailyLimit;
                         }
                         catch
                         {
                         } 
                     }
                 return todaysBalance;
+            }
+        }
+
+        public void MarkVoucherAsDone(int voucherId)
+        {
+            using (Context context = new Context())
+            {
+                Voucher voucher = context.couchers.Find(voucherId);
+                voucher.Used = true;
+                context.SaveChanges();
             }
         }
     }

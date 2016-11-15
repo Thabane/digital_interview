@@ -15,15 +15,29 @@ namespace UI.Controllers
     {
         public ActionResult Index()
         {
-            Session["ResId"] = Request.QueryString["resId"];
-            Session["SubcriptionId"] = Request.QueryString["subcriptionId"];
-            DataBank db = new DataBank();
-            return View(db.GetToDoList());
+            if (Session["UserID"] != null)
+            {
+                Session["ResId"] = Request.QueryString["resId"];
+                Session["SubcriptionId"] = Request.QueryString["subcriptionId"];
+                //
+                int UserId = Convert.ToInt32(Session["UserId"]);
+                int subId = Convert.ToInt32(Session["SubcriptionId"]);
+                DataBank db = new DataBank();
+                MethodBank mb = new MethodBank();
+                ViewBag.CreditBalance = mb.GetUserUsageBalance(subId, UserId);
+                return View(db.GetToDoList());
+            }
+            return RedirectToAction("Login", "Home", new { area = "" });
         }
 
         public ActionResult Details(int? id)
         {
-            if (id == null)
+            MethodBank mb = new MethodBank();
+            int userId = Convert.ToInt32(Session["UserID"]);
+            int subId = Convert.ToInt32(Session["SubcriptionId"]);
+            int resId = Convert.ToInt32(Session["ResId"]);
+
+            if (id == null || !mb.UseResource(userId,subId,resId))
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
@@ -54,15 +68,24 @@ namespace UI.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "ID,Title,Content,Prority,Done,CreatedDate,DueDate")] ToDoList toDoList)
         {
-            DataBank db = new DataBank();
-            toDoList.Done = false;
-            toDoList.CreatedDate = DateTime.Now;
-            toDoList.Resource = db.GetResource(Convert.ToInt32(Session["ResId"]));
-            toDoList.Resource.subcription = db.GetSubcription(Convert.ToInt32(Session["SubcriptionId"]));
-            if(db.CreateToDoListItem(toDoList))
+            MethodBank mb = new MethodBank();
+            int userId = Convert.ToInt32(Session["UserID"]);
+            int subId = Convert.ToInt32(Session["SubcriptionId"]);
+            int resId = Convert.ToInt32(Session["ResId"]);
+
+            if (mb.UseResource(userId, subId, resId))
             {
-                return RedirectToAction("Index");
+                DataBank db = new DataBank();
+                toDoList.Done = false;
+                toDoList.CreatedDate = DateTime.Now;
+                toDoList.Resource = db.GetResource(resId);
+                toDoList.Resource.subcription = db.GetSubcription(subId);
+                if (db.CreateToDoListItem(toDoList))
+                {
+                    return RedirectToAction("Index");
+                } 
             }
+            ViewBag.CreditBalance = mb.GetUserUsageBalance(subId, userId);
             return View(toDoList);
 
         }
