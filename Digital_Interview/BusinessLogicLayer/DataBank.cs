@@ -90,5 +90,100 @@ namespace BusinessLogicLayer
                 db.SaveChanges(); 
             }
         }
+
+        public List<ToDoList> GetToDoList()
+        {
+            using (Context context = new Context())
+            {
+                return context.toDoList.ToList().OrderBy(x => x.Prority).ToList(); 
+            }
+        } 
+
+        public ToDoList GetToDolistItem(int? id)
+        {
+            using (Context context = new Context())
+            {
+                return context.toDoList.Find(id); 
+            }
+        }
+
+        public bool CreateToDoListItem(ToDoList toDoList)
+        {
+            using (Context db = new Context())
+            {
+                try
+                {
+                    db.toDoList.Add(toDoList);
+                    db.SaveChanges();
+                    return true;
+                }
+                catch
+                {
+                    return false;
+                } 
+                
+            }
+        }
+
+        public void EditToDo(ToDoList toDoList)
+        {
+            using (Context db = new Context())
+            {
+                db.Entry(toDoList).State = EntityState.Modified;
+                db.SaveChanges(); 
+            }
+        }
+
+        public void RemoveToDo(ToDoList toDoList)
+        {
+            using (Context db = new Context())
+            {
+                db.toDoList.Remove(toDoList);
+                db.SaveChanges(); 
+            }
+        }
+
+        public UserSubcription GetUserSubcription(int? id)
+        {
+            using (Context db = new Context())
+            {
+                return db.userSubcriptions.Find(id); 
+            }
+        }
+
+        public void EditUserSubcription(UserSubcription userSubcription)
+        {
+            using (Context db = new Context())
+            {
+                db.Entry(userSubcription).State = EntityState.Modified;
+                db.SaveChanges(); 
+            }
+        }
+
+        public bool AddVoucher(Voucher voucher)
+        {
+            using (Context db = new Context())
+            {
+                try
+                {
+                    db.couchers.Add(voucher);
+                    db.SaveChanges();
+                    return true;
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+        }
+
+        public User GetUser(int id)
+        {
+            using (Context context = new Context())
+            {
+                return context.users.Find(id);
+            }
+        }
+        
     }
 }
